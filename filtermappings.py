@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 filtersMap = {
 	'differentialprivacy.DifferentialPrivacyFilter': 'dp',
 	'microaggregation.MicroAggregationFilter': 'ma',

@@ -8,3 +8,6 @@ streams
 
 # Libraries #
 lib/
+
+# Python compiled files #
+*.pyc

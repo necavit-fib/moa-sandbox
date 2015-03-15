@@ -1,0 +1,10 @@
+# Sandbox directories (symlinks) #
+anonymized
+evaluation
+models
+plots
+report
+streams
+
+# Libraries #
+lib/

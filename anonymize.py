@@ -11,18 +11,6 @@ import sys
 from termcolor import colored
 import textwrap
 
-'''
-"options": {
-	"suppressAnonymizationHeader": false
-}
-	stream=$(basename "$file" .arff)
-	arff_file=streams/$stream.arff
-	eval_file=evaluation/$stream-$filter_options.csv
-	anon_file=anonymized/anon-$stream-$filter_options.arff
-
-	#./moa.sh "Anonymize -s (ArffFileStream -f $arff_file) -f ($filter) -e evaluation/randomRBF-10000.csv -a anonymized/anonimized-random-RBF-10000.arff -u 1 -m 1000000000"
-	#use -Q to silence anonymization (arff file out)
-'''
 # global flags
 dryRun = False
 
@@ -90,7 +78,7 @@ def anonymizeStream(stream, privacyFilter, options):
 	if not dryRun:
 		print colored('[RUNNING]', 'green'), 'Executing:'
 		print wrapper.fill(colored(cmd, 'cyan'))
-		# TODO call(cmd, shell=True)
+		call(cmd, shell=True)
 	else:
 		print colored('[DRY RUN]', 'red'), 'Would be calling:'
 		print wrapper.fill(colored(cmd, 'cyan'))

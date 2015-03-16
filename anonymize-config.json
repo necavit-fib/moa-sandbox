@@ -49,6 +49,6 @@
 		"maximumInstances": -1,
 		"silenceEvaluation": false,
 		"evaluationOutputDirectory": "evaluation",
-		"evaluationUpdateRate": 1
+		"evaluationUpdateRate": 10
 	}
 }

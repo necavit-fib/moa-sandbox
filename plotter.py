@@ -7,14 +7,6 @@ import re
 import os
 import json
 
-# useful global variables and constants
-filtersMap = {
-    'na': 'Noise addition',
-    'ma': 'Micro-aggregation',
-    'rs': 'Rank swapping',
-    'dp': 'Differential privacy'
-}
-
 # useful regular expressions
 alpha = re.compile('[a-zA-Z]*')
 decimal = re.compile('\d+.\d+')

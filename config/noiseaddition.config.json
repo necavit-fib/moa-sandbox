@@ -1,0 +1,35 @@
+{
+	"streams": [
+		"streams/agrawal-1000000.arff"
+	],
+	"filters": [
+		{
+			"filter": "noiseaddition.NoiseAdditionFilter",
+			"params": [
+				{
+					"name": "c",
+					"values": [
+						0.0
+					]
+				},
+				{
+					"name": "a",
+					"values": [
+						0.1, 0.25, 0.5, 0.75, 1.0
+					]
+				}
+			]
+		}
+	],
+	"options": {
+		"silenceTaskReport": false,
+		"taskReportOutputDirectory": "report",
+		"silenceAnonymization": false,
+		"anonymizationOutputDirectory": "anonymized",
+		"suppressAnonymizationHeader": false,
+		"maximumInstances": -1,
+		"silenceEvaluation": false,
+		"evaluationOutputDirectory": "evaluation",
+		"evaluationUpdateRate": 10
+	}
+}

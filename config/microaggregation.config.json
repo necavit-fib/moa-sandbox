@@ -1,0 +1,36 @@
+{
+	"streams": [
+		"streams/randomRBF-1000000.arff",
+		"streams/waveform-1000000.arff"
+	],
+	"filters": [
+		{
+			"filter": "microaggregation.MicroAggregationFilter",
+			"params": [
+				{
+					"name": "k",
+					"values": [
+						3, 5, 10, 15, 20, 25, 50, 100
+					]
+				},
+				{
+					"name": "b",
+					"values": [
+						100, 500, 1000, 2500, 5000
+					]
+				}
+			]
+		}
+	],
+	"options": {
+		"silenceTaskReport": false,
+		"taskReportOutputDirectory": "report",
+		"silenceAnonymization": false,
+		"anonymizationOutputDirectory": "anonymized",
+		"suppressAnonymizationHeader": false,
+		"maximumInstances": -1,
+		"silenceEvaluation": false,
+		"evaluationOutputDirectory": "evaluation",
+		"evaluationUpdateRate": 1000
+	}
+}

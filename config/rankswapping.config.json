@@ -1,22 +1,22 @@
 {
 	"streams": [
-		"streams/randomRBF-1000000.arff",
-		"streams/waveform-1000000.arff"
+		"streams/randomRBF-10000.arff",
+		"streams/waveform-10000.arff"
 	],
 	"filters": [
 		{
-			"filter": "noiseaddition.NoiseAdditionFilter",
+			"filter": "rankswapping.RankSwappingFilter",
 			"params": [
 				{
-					"name": "c",
+					"name": "p",
 					"values": [
-						0.0
+						2, 4, 6, 8, 10, 12, 14, 16, 18, 20
 					]
 				},
 				{
-					"name": "a",
+					"name": "b",
 					"values": [
-						0.1, 0.25, 0.5, 0.75, 1.0
+						100, 500, 1000, 2500, 5000
 					]
 				}
 			]
@@ -25,7 +25,7 @@
 	"options": {
 		"silenceTaskReport": false,
 		"taskReportOutputDirectory": "report",
-		"silenceAnonymization": false,
+		"silenceAnonymization": true,
 		"anonymizationOutputDirectory": "anonymized",
 		"suppressAnonymizationHeader": false,
 		"maximumInstances": -1,

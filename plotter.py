@@ -30,13 +30,36 @@ def plot(file, params):
 
         plotTitle = os.path.splitext(os.path.basename(file))[0]
         plotter.plot(xValues, yValues)
-        plotter.suptitle(plotTitle, fontsize=50)
+        #plotter.suptitle(plotTitle, fontsize=50)
         plotter.xlabel('Instaces')
         plotter.ylabel(yAxisLabel)
 
         plotFilename = 'plots/' + plotTitle
-        plotter.savefig(plotFilename+'.pdf') #, bbox_inches='tight'
 
+
+def exportAndShow():
+    plotter.savefig('plot1.pdf') #, bbox_inches='tight'
+    plotter.show()
+
+def plotFiles(col, files):
+    column = col
+    for file in files:
+        with open(file, 'rb') as csvfile:
+            reader = csv.reader(csvfile)
+            yValues = []
+            xValues = []
+            yAxisLabel = ''
+            for j, row in enumerate(reader,0):
+                if j == 0:
+                    yAxisLabel = str(row[column])
+                else:
+                    yValues.append(float(row[column]))
+                    xValues.append(j)
+            plotter.plot(xValues, yValues)
+            plotter.xlabel('Instaces')
+            plotter.ylabel(yAxisLabel)
+    exportAndShow()
+'''
 def plotFile(filePath, parameters):
     print filePath
 
@@ -98,10 +121,13 @@ def plotFiles(filesDir):
             basename = os.path.splitext(os.path.basename(file))[0]
             plotParams = parseBasename(basename)
             plotFile(file, plotParams)
+'''
 
 if __name__ == '__main__':
     # TODO do this: plotFiles('evaluation')
     #   and remove the following code
 
     plotParams = {}
-    plot(file=sys.argv[1], params=plotParams)
+    column = int(sys.argv[1])
+    plotFiles(column, sys.argv[2:len(sys.argv)])
+    #plot(file=sys.argv[1], params=plotParams)

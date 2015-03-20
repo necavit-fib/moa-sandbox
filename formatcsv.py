@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import argparse
+import os
 
 def writeToFile(out, string):
 	print(string, file=out)
@@ -16,7 +17,7 @@ def reformatRow(numbers):
 	return s
 
 def reformatFile(file, outDir, suffix):
-	o = outDir + '/' + file.name + '.' + suffix
+	o = outDir + '/' + os.path.basename(file.name) + '.' + suffix
 	with open(o, 'wb') as outFile:
 		lines = file.readlines()
 		for i, row in enumerate(lines, 0):

@@ -1,17 +1,77 @@
 #!/usr/bin/env python
 
-import sys
+import argparse
 import csv
-import matplotlib.pyplot as plotter
-import re
-import os
 import json
+import matplotlib.pyplot as plotter
+import os
+import re
+import sys
+
 
 # useful regular expressions
 alpha = re.compile('[a-zA-Z]*')
 decimal = re.compile('\d+.\d+')
 number = re.compile('\d+')
 
+# plot options for colored plots
+colorOptions = [
+# solid linestyle
+    {'color': 'blue', 'marker': None, 'linestyle': '-'},
+    {'color': 'red', 'marker': None, 'linestyle': '-'},
+    {'color': 'green', 'marker': None, 'linestyle': '-'},
+    {'color': 'cyan', 'marker': None, 'linestyle': '-'},
+    {'color': 'magenta', 'marker': None, 'linestyle': '-'},
+# dashed linestyle
+    {'color': 'blue', 'marker': None, 'linestyle': '--'},
+    {'color': 'red', 'marker': None, 'linestyle': '--'},
+    {'color': 'green', 'marker': None, 'linestyle': '--'},
+    {'color': 'cyan', 'marker': None, 'linestyle': '--'},
+    {'color': 'magenta', 'marker': None, 'linestyle': '--'},
+# dash-dot linestyle
+    {'color': 'blue', 'marker': None, 'linestyle': '-.'},
+    {'color': 'red', 'marker': None, 'linestyle': '-.'},
+    {'color': 'green', 'marker': None, 'linestyle': '-.'},
+    {'color': 'cyan', 'marker': None, 'linestyle': '-.'},
+    {'color': 'magenta', 'marker': None, 'linestyle': '-.'},
+# dot linestyle
+    {'color': 'blue', 'marker': None, 'linestyle': ':'},
+    {'color': 'red', 'marker': None, 'linestyle': ':'},
+    {'color': 'green', 'marker': None, 'linestyle': ':'},
+    {'color': 'cyan', 'marker': None, 'linestyle': ':'},
+    {'color': 'magenta', 'marker': None, 'linestyle': ':'}
+]
+
+# plot options for B&W plots
+bwOptions = [
+# no marker
+    {'color': 'k', 'marker': None, 'linestyle': '-'},
+    {'color': 'k', 'marker': None, 'linestyle': '--'},
+    {'color': 'k', 'marker': None, 'linestyle': '-.'},
+    {'color': 'k', 'marker': None, 'linestyle': ':'},
+# circle marker
+    {'color': 'k', 'marker': 'o', 'linestyle': '-'},
+    {'color': 'k', 'marker': 'o', 'linestyle': '--'},
+    {'color': 'k', 'marker': 'o', 'linestyle': '-.'},
+    {'color': 'k', 'marker': 'o', 'linestyle': ':'},
+# down triangle marker
+    {'color': 'k', 'marker': 'v', 'linestyle': '-'},
+    {'color': 'k', 'marker': 'v', 'linestyle': '--'},
+    {'color': 'k', 'marker': 'v', 'linestyle': '-.'},
+    {'color': 'k', 'marker': 'v', 'linestyle': ':'},
+# square marker
+    {'color': 'k', 'marker': 's', 'linestyle': '-'},
+    {'color': 'k', 'marker': 's', 'linestyle': '--'},
+    {'color': 'k', 'marker': 's', 'linestyle': '-.'},
+    {'color': 'k', 'marker': 's', 'linestyle': ':'},
+# up triangle marker
+    {'color': 'k', 'marker': '^', 'linestyle': '-'},
+    {'color': 'k', 'marker': '^', 'linestyle': '--'},
+    {'color': 'k', 'marker': '^', 'linestyle': '-.'},
+    {'color': 'k', 'marker': '^', 'linestyle': ':'}
+]
+
+'''
 def plot(file, params):
     print 'Plot with CSV: ', str(csv), ' and parameters: ', json.dumps(params, sort_keys=True, indent=4)
     column = 0
@@ -60,8 +120,8 @@ def plotFiles(col, files):
             plotter.ylabel(yAxisLabel)
     exportAndShow()
 '''
-def plotFile(filePath, parameters):
-    print filePath
+
+'''
 
 def getParams(paramsList):
     params = []
@@ -112,22 +172,43 @@ def parseBasename(basename):
     print 'plotParams:', json.dumps(plotParams, sort_keys=True, indent=4)
 
     return plotParams
-
-def plotFiles(filesDir):
-    files = os.listdir(filesDir)
-    files.sort()
-    for file in files:
-        if file.endswith('.csv'):
-            basename = os.path.splitext(os.path.basename(file))[0]
-            plotParams = parseBasename(basename)
-            plotFile(file, plotParams)
 '''
 
-if __name__ == '__main__':
-    # TODO do this: plotFiles('evaluation')
-    #   and remove the following code
 
-    plotParams = {}
-    column = int(sys.argv[1])
-    plotFiles(column, sys.argv[2:len(sys.argv)])
-    #plot(file=sys.argv[1], params=plotParams)
+def plotDataSeries(data, options):
+    plotter.plot(data.x, data.y,
+                    color=options['color'],
+                    marker=options['marker'],
+                    linestyle=options['linestyle'])
+
+def exportTo(outFile):
+    print outFile
+    plotter.savefig(outFile)
+
+def plotWithArgs(args):
+    print args
+    # TODO
+
+    #data
+
+    # export the plot to the PDF output file
+    #exportTo(args.out_file.name)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Plots data from CSV files using Matplotlib.')
+    parser.add_argument('-w', '--black-white', action='store_true',
+                        help='build the plot using a black and white scheme (use ticks, instead of color)')
+    parser.add_argument('-x', '--x-axis', help='the label of the X axis')
+    parser.add_argument('-y', '--y-axis', help='the label of the Y axis')
+    parser.add_argument('-p', '--parameters', nargs='+',
+                        help='the selected parameters to be included in the plot legend')
+    parser.add_argument('-c', '--columns', type=int, nargs='+', required=True,
+                        help='the selected columns to be plotted')
+    parser.add_argument('-o', '--out-file', type=argparse.FileType('w'), required=True,
+                        help='the file where the plot will be saved to')
+    parser.add_argument('-i', '--in-files', nargs='+', type=argparse.FileType('r'), required=True,
+                        help='the CSV file or files used as input data')
+    args = parser.parse_args()
+
+    # main procedure
+    plotWithArgs(args)

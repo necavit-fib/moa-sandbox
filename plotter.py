@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
 import argparse
+from collections import namedtuple
 import csv
-import json
 import matplotlib.pyplot as plotter
 import os
 import re
-import sys
 
+# Data named tuple (data type)
+Data = namedtuple('Data', ['x', 'y', 'legend'])
 
 # useful regular expressions
 alpha = re.compile('[a-zA-Z]*')
@@ -49,161 +50,174 @@ bwOptions = [
     {'color': 'k', 'marker': None, 'linestyle': '--'},
     {'color': 'k', 'marker': None, 'linestyle': '-.'},
     {'color': 'k', 'marker': None, 'linestyle': ':'},
-# circle marker
-    {'color': 'k', 'marker': 'o', 'linestyle': '-'},
-    {'color': 'k', 'marker': 'o', 'linestyle': '--'},
-    {'color': 'k', 'marker': 'o', 'linestyle': '-.'},
-    {'color': 'k', 'marker': 'o', 'linestyle': ':'},
-# down triangle marker
-    {'color': 'k', 'marker': 'v', 'linestyle': '-'},
-    {'color': 'k', 'marker': 'v', 'linestyle': '--'},
-    {'color': 'k', 'marker': 'v', 'linestyle': '-.'},
-    {'color': 'k', 'marker': 'v', 'linestyle': ':'},
-# square marker
-    {'color': 'k', 'marker': 's', 'linestyle': '-'},
-    {'color': 'k', 'marker': 's', 'linestyle': '--'},
-    {'color': 'k', 'marker': 's', 'linestyle': '-.'},
-    {'color': 'k', 'marker': 's', 'linestyle': ':'},
-# up triangle marker
+# solid
     {'color': 'k', 'marker': '^', 'linestyle': '-'},
+    {'color': 'k', 'marker': 's', 'linestyle': '-'},
+    {'color': 'k', 'marker': 'v', 'linestyle': '-'},
+    {'color': 'k', 'marker': 'o', 'linestyle': '-'},
+# dashed
     {'color': 'k', 'marker': '^', 'linestyle': '--'},
+    {'color': 'k', 'marker': 's', 'linestyle': '--'},
+    {'color': 'k', 'marker': 'v', 'linestyle': '--'},
+    {'color': 'k', 'marker': 'o', 'linestyle': '--'},
+# dash-dot
     {'color': 'k', 'marker': '^', 'linestyle': '-.'},
-    {'color': 'k', 'marker': '^', 'linestyle': ':'}
+    {'color': 'k', 'marker': 's', 'linestyle': '-.'},
+    {'color': 'k', 'marker': 'v', 'linestyle': '-.'},
+    {'color': 'k', 'marker': 'o', 'linestyle': '-.'},
+# dot
+    {'color': 'k', 'marker': '^', 'linestyle': ':'},
+    {'color': 'k', 'marker': 's', 'linestyle': ':'},
+    {'color': 'k', 'marker': 'v', 'linestyle': ':'},
+    {'color': 'k', 'marker': 'o', 'linestyle': ':'}
 ]
 
-'''
-def plot(file, params):
-    print 'Plot with CSV: ', str(csv), ' and parameters: ', json.dumps(params, sort_keys=True, indent=4)
-    column = 0
-    with open(file, 'rb') as csvfile:
-        reader = csv.reader(csvfile)
-        yValues = []
-        xValues = []
-        yAxisLabel = ''
-        for i, row in enumerate(reader,0):
-            if i == 0:
-                yAxisLabel = str(row[column])
-            else:
-                yValues.append(float(row[column]))
-                xValues.append(i)
+def parseParams(paramsString):
+    params = {}
+    chunks = paramsString.split('-')
 
-
-        plotTitle = os.path.splitext(os.path.basename(file))[0]
-        plotter.plot(xValues, yValues)
-        #plotter.suptitle(plotTitle, fontsize=50)
-        plotter.xlabel('Instaces')
-        plotter.ylabel(yAxisLabel)
-
-        plotFilename = 'plots/' + plotTitle
-
-
-def exportAndShow():
-    plotter.savefig('plot1.pdf') #, bbox_inches='tight'
-    plotter.show()
-
-def plotFiles(col, files):
-    column = col
-    for file in files:
-        with open(file, 'rb') as csvfile:
-            reader = csv.reader(csvfile)
-            yValues = []
-            xValues = []
-            yAxisLabel = ''
-            for j, row in enumerate(reader,0):
-                if j == 0:
-                    yAxisLabel = str(row[column])
-                else:
-                    yValues.append(float(row[column]))
-                    xValues.append(j)
-            plotter.plot(xValues, yValues)
-            plotter.xlabel('Instaces')
-            plotter.ylabel(yAxisLabel)
-    exportAndShow()
-'''
-
-'''
-
-def getParams(paramsList):
-    params = []
-
-    for paramDescription in paramsList:
-        param = {}
-
-        name = re.match(alpha, paramDescription).group(0)
-        param['name'] = name
-
-        value = re.search(decimal, paramDescription)
-        if value:
-            param['value'] = float(value.group(0))
+    for chunk in chunks[1:len(chunks)]:
+        name = re.match(alpha, chunk).group(0)
+        match = re.search(decimal, chunk)
+        if match:
+            value = float(match.group(0))
         else:
-            value = re.search(number, paramDescription).group(0)
-            param['value'] = int(value)
-
-        params.append(param)
+            value = int(re.search(number, chunk).group(0))
+        params[name] = value
 
     return params
 
-def parseStreamParams(streamString):
-    chunks = re.split('-', streamString)
+def parseParamsFromFile(file):
+    basename = os.path.basename(file.name)
+    return parseParams(basename.split('_')[0])
 
-    streamParams = {}
-    streamParams['stream'] = chunks[0]
-    streamParams['instances'] = int(chunks[1])
+def getLegendLabelForFile(file, args):
+    if args.parameters == None:
+        return '_nolegend_'
 
-    return streamParams
+    legend = ''
+    params = parseParamsFromFile(file)
+    for selectedParam in args.parameters:
+        if params[selectedParam] == None:
+            raise NameError('You have selected a parameter that was not specified ' +
+                            'in the file name: ' + selectedParam)
+        else:
+            legend += selectedParam + ' = ' + str(params[selectedParam]) + ' '
 
-def parseFilterParams(filterString):
-    chunks = re.split('-', filterString)
+    return legend
 
-    filterParams = {}
-    filterParams['filterName'] = chunks[0]
-    filterParams['parameters'] = getParams(chunks[1:len(chunks)])
+def selectDataFromFile(file, args):
+    legendLabel = getLegendLabelForFile(file, args)
+    xValues = []
+    yValues = []
 
-    return filterParams
+    col = args.column
+    reader = csv.reader(file)
+    for i, row in enumerate(reader,0):
+        if i > 0: # skip the CSV header
+            xValues.append(i)
+            yValues.append(float(row[col]))
 
-def parseBasename(basename):
-    chunks = re.split('_', basename)
-    # chunks has 2 items: the filter and its parameters [0] and the stream [1]
+    data = Data(x=xValues, y=yValues, legend=legendLabel)
+    return data
 
-    plotParams = {}
-    plotParams['filter'] = parseFilterParams(chunks[0])
-    plotParams['stream'] = parseStreamParams(chunks[1])
+def getDataSelection(args):
+    selection = []
 
-    print 'plotParams:', json.dumps(plotParams, sort_keys=True, indent=4)
+    for file in args.in_files:
+        data = selectDataFromFile(file, args)
+        selection.append(data)
 
-    return plotParams
-'''
+    return selection
 
+def plotDataSeries(ax, data, options):
+    ax.plot(data.x, data.y,
+            label=data.legend,
+            color=options['color'],
+            marker=options['marker'],
+            linestyle=options['linestyle'],
+            markevery=100,
+            markersize=5.0)
 
-def plotDataSeries(data, options):
-    plotter.plot(data.x, data.y,
-                    color=options['color'],
-                    marker=options['marker'],
-                    linestyle=options['linestyle'])
+def labelPlot(ax, args):
+    ax.set_ylabel(getYLabel(args))
+    ax.set_xlabel(args.x_label)
+    if args.title != None:
+        ax.set_title(args.title)
 
-def exportTo(outFile):
-    print outFile
-    plotter.savefig(outFile)
+def formatAxes(ax):
+    ax.spines['top'].set_visible(False)
+    ax.xaxis.set_ticks_position('bottom')
+    ax.spines['right'].set_visible(False)
+    ax.yaxis.set_ticks_position('left')
+
+def makeLegend(ax):
+    legend = ax.legend(loc='center left', bbox_to_anchor=(1.0, 0.5))
+    frame = legend.get_frame()
+    frame.set_alpha(0.0)
+    return legend
+
+def exportTo(figure, outFile, legend):
+    figure.savefig(outFile, bbox_inches='tight', bbox_extra_artists=(legend,))
+
+def getPlotOptions(args):
+    if args.black_white:
+        return bwOptions
+    else:
+        return colorOptions
+
+def getYLabel(args):
+    if args.y_label == 'infer':
+        with open(args.in_files[0].name, 'rb') as f:
+            header = f.readline().strip()
+            return header.split(',')[args.column]
+    else:
+        return args.y_label
 
 def plotWithArgs(args):
-    print args
-    # TODO
+    selection = getDataSelection(args)
+    lineOptions = getPlotOptions(args)
 
-    #data
+    # PLOTTING BEGINS HERE!
+    # prepare canvas and axes
+    figure = plotter.figure(1)
+    ax = figure.add_subplot(111)
 
-    # export the plot to the PDF output file
-    #exportTo(args.out_file.name)
+    # for each data set selected previously ((x,y) values, legend...),
+    #  plot them to the current axes (figure)
+    for i, data in enumerate(selection, 0):
+        if i >= len(lineOptions):
+            raise NameError('You are trying to plot too many data series. No more line style combinations are possible.')
+        plotDataSeries(ax, data, lineOptions[i])
+
+    labelPlot(ax, args) # axis labeling and title
+    formatAxes(ax) # spines and frame options
+    lgd = makeLegend(ax) # plot legend
+    exportTo(figure, args.out_file.name, lgd) # export the plot to the PDF output file
+
+    # show  the plot if necessary
+    if args.show:
+        plotter.show()
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Plots data from CSV files using Matplotlib.')
+    # argument parsing
+    parser = argparse.ArgumentParser(
+                        description='Plots moa-ppsm evaluation data from CSV files using Matplotlib.')
+    parser.add_argument('-s', '--show', action='store_true',
+                        help='shows the plot, besides exporting it')
     parser.add_argument('-w', '--black-white', action='store_true',
                         help='build the plot using a black and white scheme (use ticks, instead of color)')
-    parser.add_argument('-x', '--x-axis', help='the label of the X axis')
-    parser.add_argument('-y', '--y-axis', help='the label of the Y axis')
+    parser.add_argument('-t', '--title', default=None,
+                        help='the title for the plot')
+    parser.add_argument('-x', '--x-label', default='X',
+                        help='the label of the X axis')
+    parser.add_argument('-y', '--y-label', default='infer',
+                        help='the label of the Y axis. If not specified or "infer" is set, '+
+                                'the label will be extracted from the CSV header')
     parser.add_argument('-p', '--parameters', nargs='+',
                         help='the selected parameters to be included in the plot legend')
-    parser.add_argument('-c', '--columns', type=int, nargs='+', required=True,
-                        help='the selected columns to be plotted')
+    parser.add_argument('-c', '--column', type=int, required=True,
+                        help='the selected column to be plotted')
     parser.add_argument('-o', '--out-file', type=argparse.FileType('w'), required=True,
                         help='the file where the plot will be saved to')
     parser.add_argument('-i', '--in-files', nargs='+', type=argparse.FileType('r'), required=True,

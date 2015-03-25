@@ -1,6 +1,7 @@
 {
 	"streams": [
-		"streams/randomRBF-10000.arff"
+		"streams/randomRBF-1000000.arff",
+		"streams/waveform-1000000.arff"
 	],
 	"filters": [
 		{
@@ -9,19 +10,19 @@
 				{
 					"name": "k",
 					"values": [
-						3
+						20, 25, 50, 100
 					]
 				},
 				{
 					"name": "e",
 					"values": [
-						0.01
+						1, 10
 					]
 				},
 				{
 					"name": "b",
 					"values": [
-						100
+						100, 500, 1000, 2500, 5000
 					]
 				}
 			]

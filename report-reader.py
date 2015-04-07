@@ -90,12 +90,13 @@ def readReports(args):
 		stream = parseStreamFromFile(report)
 		instances = parseInstancesFromFile(report)
 		params = parseParamsFromFile(report)
-		discRisk = parseDisclosureRiskFromFile(report)
-		infoLoss = parseInformationLossFromFile(report)
+		discRisk = parseDisclosureRiskFromFile(report).replace(',','.')
+		infoLoss = parseInformationLossFromFile(report).replace(',','.')
 
 		# write to CSV:
 		if i == 0:
-			out.write(getCSVHeader(params) + '\n')
+			header = getCSVHeader(params)
+			out.write(header + '\n')
 		csvLine = getCsvLine(method, stream, instances, params, discRisk, infoLoss)
 		out.write(csvLine+'\n')
 

@@ -3,7 +3,7 @@
 import argparse
 import os
 from subprocess import call
-
+from termcolor import colored
 
 def executeMOATask(reportFile, outDir):
 	basename = os.path.splitext(os.path.basename(reportFile.name))[0]
@@ -13,10 +13,10 @@ def executeMOATask(reportFile, outDir):
 		'out': outFile
 	}
 	cmd = './moa.sh "ReadAnonymizationReport -r %(report)s" > %(out)s' % cmdFormat
-	print cmd
-	#call(cmd, shell=True)
+	print colored('[RUNNING]', 'green'), 'Executing:', cmd
+	call(cmd, shell=True)
 
-def readReportsWithArgs(args):
+def dumpReportsWithArgs(args):
 	for file in args.report_files:
 		executeMOATask(file, args.out_dir)
 
@@ -32,4 +32,4 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	# main procedure
-	readReportsWithArgs(args)
+	dumpReportsWithArgs(args)

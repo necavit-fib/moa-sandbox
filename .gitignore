@@ -5,6 +5,8 @@ models
 plots
 report
 streams
+results
+dumped-report
 
 # Libraries #
 lib/

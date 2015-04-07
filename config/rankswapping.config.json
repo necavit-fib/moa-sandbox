@@ -1,7 +1,7 @@
 {
 	"streams": [
-		"streams/randomRBF-10000.arff",
-		"streams/waveform-10000.arff"
+		"generators.RandomRBFGenerator",
+		"generators.WaveformGenerator"
 	],
 	"filters": [
 		{
@@ -10,13 +10,13 @@
 				{
 					"name": "p",
 					"values": [
-						2, 4, 6, 8, 10, 12, 14, 16, 18, 20
+						10, 25, 50, 75, 80
 					]
 				},
 				{
 					"name": "b",
 					"values": [
-						100, 500, 1000, 2500, 5000
+						100, 250, 500, 1000
 					]
 				}
 			]
@@ -24,12 +24,12 @@
 	],
 	"options": {
 		"silenceTaskReport": false,
-		"taskReportOutputDirectory": "report",
+		"taskReportOutputDirectory": "report-enhanced",
 		"silenceAnonymization": true,
 		"anonymizationOutputDirectory": "anonymized",
 		"suppressAnonymizationHeader": false,
-		"maximumInstances": -1,
-		"silenceEvaluation": false,
+		"maximumInstances": 100000,
+		"silenceEvaluation": true,
 		"evaluationOutputDirectory": "evaluation",
 		"evaluationUpdateRate": 1000
 	}

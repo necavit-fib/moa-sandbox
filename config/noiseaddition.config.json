@@ -1,7 +1,7 @@
 {
 	"streams": [
-		"streams/randomRBF-1000000.arff",
-		"streams/waveform-1000000.arff"
+		"generators.RandomRBFGenerator",
+		"generators.WaveformGenerator"
 	],
 	"filters": [
 		{
@@ -24,12 +24,12 @@
 	],
 	"options": {
 		"silenceTaskReport": false,
-		"taskReportOutputDirectory": "report",
-		"silenceAnonymization": false,
+		"taskReportOutputDirectory": "report-enhanced",
+		"silenceAnonymization": true,
 		"anonymizationOutputDirectory": "anonymized",
 		"suppressAnonymizationHeader": false,
-		"maximumInstances": -1,
-		"silenceEvaluation": false,
+		"maximumInstances": 100000,
+		"silenceEvaluation": true,
 		"evaluationOutputDirectory": "evaluation",
 		"evaluationUpdateRate": 1000
 	}

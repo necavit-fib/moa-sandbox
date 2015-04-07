@@ -66,7 +66,7 @@ def getOptionsForFilterAndStream(options, filterSpec, stream):
 
 def anonymizeStream(stream, privacyFilter, options):
 	cmdFormat = {
-		'streamSpec': '(ArffFileStream -f %s)' % stream,
+		'streamSpec': '(%s)' % stream,
 		'filterSpec': '(%s)' % privacyFilter,
 		'optString': getOptionsForFilterAndStream(options, privacyFilter, stream)
 	}

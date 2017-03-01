@@ -21,7 +21,7 @@ def getCodedFilterSpec(filterSpec):
 	return getFilterCode(filterName) + filterParams
 
 def getBaseFilename(stream, filterSpec):
-	streamName = os.path.splitext(os.path.basename(stream))[0]
+	streamName = stream.split('.')[1]
 	codedFilterSpec = getCodedFilterSpec(filterSpec)
 	return codedFilterSpec + '_' + streamName
 

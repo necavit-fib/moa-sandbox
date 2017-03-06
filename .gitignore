@@ -8,9 +8,13 @@ report-enhanced
 streams
 results
 dumped-report
+logs
 
 # Libraries #
 lib/
 
 # Python compiled files #
 *.pyc
+
+# Automated parallel computation scripts #
+Makefile

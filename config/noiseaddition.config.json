@@ -24,13 +24,13 @@
 	],
 	"options": {
 		"silenceTaskReport": false,
-		"taskReportOutputDirectory": "report-enhanced",
-		"silenceAnonymization": true,
-		"anonymizationOutputDirectory": "anonymized",
+		"taskReportOutputDirectory": "report",
+		"silenceAnonymization": false,
+		"anonymizationOutputDirectory": "streams/anonymous",
 		"suppressAnonymizationHeader": false,
-		"maximumInstances": 100000,
-		"silenceEvaluation": true,
+		"maximumInstances": 1000,
+		"silenceEvaluation": false,
 		"evaluationOutputDirectory": "evaluation",
-		"evaluationUpdateRate": 1000
+		"evaluationUpdateRate": 10
 	}
 }

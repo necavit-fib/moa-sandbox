@@ -10,13 +10,13 @@
 				{
 					"name": "p",
 					"values": [
-						10, 25, 50, 75, 80
+						25, 50, 75
 					]
 				},
 				{
 					"name": "b",
 					"values": [
-						100, 250, 500, 1000
+						100000
 					]
 				}
 			]
@@ -24,12 +24,12 @@
 	],
 	"options": {
 		"silenceTaskReport": false,
-		"taskReportOutputDirectory": "report-enhanced",
+		"taskReportOutputDirectory": "report",
 		"silenceAnonymization": true,
-		"anonymizationOutputDirectory": "anonymized",
+		"anonymizationOutputDirectory": "streams/anonymous",
 		"suppressAnonymizationHeader": false,
-		"maximumInstances": 100000,
-		"silenceEvaluation": true,
+		"maximumInstances": 10000000,
+		"silenceEvaluation": false,
 		"evaluationOutputDirectory": "evaluation",
 		"evaluationUpdateRate": 1000
 	}

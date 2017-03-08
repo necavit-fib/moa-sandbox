@@ -1,4 +1,4 @@
-# Sandbox directories (symlinks) #
+# Sandbox directories #
 anonymized
 evaluation
 models
@@ -9,9 +9,8 @@ streams
 results
 dumped-report
 logs
-
-# Libraries #
-lib/
+throughput
+lib
 
 # Python compiled files #
 *.pyc

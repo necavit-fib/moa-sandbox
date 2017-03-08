@@ -30,58 +30,58 @@ def getBaseFilename(stream, filterSpec):
 	codedFilterSpec = getCodedFilterSpec(filterSpec)
 	return codedFilterSpec + '_' + streamName
 
-def getEvaluationFilename(outDir, stream, filterSpec):
-	return outDir + '/' + getBaseFilename(stream, filterSpec) + '.csv'
+def getFile(outDir, baseFilename, extension):
+	return outDir + '/' + baseFilename + '.' + extension
 
-def getAnonymizedFilename(outDir, stream, filterSpec):
-	return outDir + '/' + getBaseFilename(stream, filterSpec) + '.arff'
-
-def getReportFilename(outDir, stream, filterSpec):
-	return outDir + '/' + getBaseFilename(stream, filterSpec) + '.moa'
-
-def getParallelLogFilename(outDir, stream, filterSpec):
-	return outDir + '/' + getBaseFilename(stream, filterSpec) + '.log'
-
-def getOptionsForFilterAndStream(options, filterSpec, stream):
+def getTaskOptions(options, filterSpec, stream):
 	optionsSpec = ''
+	baseFilename = getBaseFilename(stream,filterSpec) # filename for the task
+
+	# instances to anonymize
+	optionsSpec += '-m ' + str(options['maximumInstances']) + ' '
 
 	# task report
-	if options['silenceTaskReport']:
-		optionsSpec += '-O /dev/null '
-	else:
-		file = getReportFilename(options['taskReportOutputDirectory'], stream, filterSpec)
-		optionsSpec += '-O ' + file + ' '
+	reportOptions = options['report']
+	if reportOptions['writeTaskReport']:
+		file = getFile(options['taskReportDirectory'], baseFilename, 'txt')
+		optionsSpec += '-r ' + file + ' '
 
 	# anonymization
-	optionsSpec += '-m ' + str(options['maximumInstances']) + ' '
-	if options['suppressAnonymizationHeader']:
-		optionsSpec += '-h '
-	if options['silenceAnonymization']:
-		optionsSpec += '-Q '
-	else:
-		file = getAnonymizedFilename(options['anonymizationOutputDirectory'], stream, filterSpec)
+	anonOptions = options['anonymization']
+	if anonOptions['writeAnonymization']:
+		file = getFile(options['anonymizationDirectory'], baseFilename, 'arff')
 		optionsSpec += '-a ' + file + ' '
+		if anonOptions['suppressAnonymizationHeader']:
+			optionsSpec += '-h '
 
 	# evaluation
-	optionsSpec += '-u ' + str(options['evaluationUpdateRate']) + ' '
-	if options['silenceEvaluation']:
-		optionsSpec += '-q '
-	else:
-		file = getEvaluationFilename(options['evaluationOutputDirectory'], stream, filterSpec)
+	evalOptions = options['evaluation']
+	if evalOptions['writeEvaluation']:
+		file = getFile(evalOptions['evaluationDirectory'], baseFilename, 'csv')
 		optionsSpec += '-e ' + file + ' '
+		optionsSpec += '-u ' + str(evalOptions['evaluationUpdateRate']) + ' '
+
+	# throughput
+	throughputOptions = options['throughput']
+	if throughputOptions['writeThroughput']:
+		file = getFile(throughputOptions['throughputDirectory'], baseFilename, 'csv')
+		optionsSpec += '-t ' + file + ' '
+		optionsSpec += '-U ' + str(throughputOptions['throughputUpdateRate']) + ' '
 
 	return optionsSpec
 
 def anonymizeStream(stream, privacyFilter, options):
+	# build the command line call
 	cmdFormat = {
-		'streamSpec': '(%s)' % stream,
-		'filterSpec': '(%s)' % privacyFilter,
-		'optString': getOptionsForFilterAndStream(options, privacyFilter, stream)
+		'stream': '(%s)' % stream,
+		'filter': '(%s)' % privacyFilter,
+		'taskOpts': getTaskOptions(options, privacyFilter, stream)
 	}
-	cmd = './moa.sh "Anonymize -s %(streamSpec)s -f %(filterSpec)s %(optString)s"' % cmdFormat
+	cmd = './moa.sh "Anonymize -s %(stream)s -f %(filter)s %(taskOpts)s"' % cmdFormat
 
+	# add the necessary redirection for parallel execution
 	if parallel:
-		cmd += ' &> %s' % getParallelLogFilename(logsDir, stream, privacyFilter)
+		cmd += ' &> %s' % getFile(logsDir, getBaseFilename(stream, privacyFilter), 'log')
 
 	# build wrapper to print nice, short lines in the CLI
 	wrapper = textwrap.TextWrapper(initial_indent='    ', width=120, subsequent_indent='    ')
@@ -96,6 +96,7 @@ def anonymizeStream(stream, privacyFilter, options):
 			makefile.write('%s:\n' % parallelTasks[len(parallelTasks) -1])
 			makefile.write('\t%s\n' % cmd)
 	else:
+		# check whether or not to actually execute the tasks
 		if not dryRun:
 			print colored('[RUNNING]', 'green'), 'Executing:'
 			print wrapper.fill(colored(cmd, 'cyan'))
@@ -104,30 +105,24 @@ def anonymizeStream(stream, privacyFilter, options):
 			print colored('[DRY RUN]', 'red'), 'Would be calling:'
 			print wrapper.fill(colored(cmd, 'cyan'))
 
-def anonymizeWithFilter(privacyFilter, streams, options):
-	for stream in streams:
-		anonymizeStream(stream, privacyFilter, options)
-
-def getFilterParams(paramsPermutation, paramsNames):
+def buildFilterParams(paramsPermutation, paramsNames):
 	params = ''
 	for i, value in enumerate(paramsPermutation, 0):
 		params = params+'-'+paramsNames[i]+' '+str(value)+' '
 
 	return params.strip()
 
-def getFilter(filterName, filterParams):
-	return filterName + ' ' + filterParams
-
 def anonymizeWithConfig(configuration):
 	filters = configuration['filters']
 	streams = configuration['streams']
 	options = configuration['options']
 
+	# for each filter in the configuration
 	for privacyFilter in filters:
 		filterName = privacyFilter['filter']
 		params = privacyFilter['params']
 
-		# generate all permutations
+		# generate all permutations of filter parameters
 		paramsNames = []
 		paramsValues = []
 		for param in params:
@@ -135,11 +130,15 @@ def anonymizeWithConfig(configuration):
 			paramsValues.append(param['values'])
 		paramsPermutations = list(itertools.product(*paramsValues))
 
-		# generate filter string and anonymize for each stream
+		# for each permutation of filter parameters
 		for permutation in paramsPermutations:
-			filterParams = getFilterParams(permutation, paramsNames)
-			builtFilter = getFilter(filterName, filterParams)
-			anonymizeWithFilter(builtFilter, streams, options)
+			# generate filter specification
+			filterParams = buildFilterParams(permutation, paramsNames)
+			builtFilter = filterName + ' ' + filterParams
+
+			# for each stream to anonymize, with the built filter specification
+			for stream in streams:
+				anonymizeStream(stream, builtFilter, options)
 
 	if parallel:
 		with open('Makefile', 'a') as makefile:
@@ -147,8 +146,6 @@ def anonymizeWithConfig(configuration):
 			makefile.write('all: ')
 			makefile.write(tasks)
 			makefile.write('\n')
-			#print 'all:', tasks
-			#print colored('REMEMBER to execute', 'red'), '"make -j JOBS"', colored('on the generated Makefile', 'red')
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Anonymize stream files using MOA privacy filters.')

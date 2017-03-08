@@ -1,0 +1,46 @@
+{
+	"streams": [
+		"generators.RandomRBFGenerator"
+	],
+	"filters": [
+		{
+			"filter": "noiseaddition.NoiseAdditionFilter",
+			"params": [
+				{
+					"name": "c",
+					"values": [
+						0.0
+					]
+				},
+				{
+					"name": "a",
+					"values": [
+						0.1
+					]
+				}
+			]
+		}
+	],
+	"options": {
+		"maximumInstances": 100000,
+		"report": {
+			"writeTaskReport": true,
+			"taskReportDirectory": "report"
+		},
+		"anonymization": {
+			"writeAnonymization": false,
+			"suppressAnonymizationHeader": false,
+			"anonymizationDirectory": "streams/anonymous"
+		},
+		"evaluation": {
+			"writeEvaluation": false,
+			"evaluationDirectory": "evaluation",
+			"evaluationUpdateRate": 100
+		},
+		"throughput": {
+			"writeThroughput": false,
+			"throughputDirectory": "throughput",
+			"throughputUpdateRate": 100
+		}
+	}
+}

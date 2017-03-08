@@ -23,14 +23,17 @@
 		}
 	],
 	"options": {
-		"silenceTaskReport": false,
-		"taskReportOutputDirectory": "report",
-		"silenceAnonymization": false,
-		"anonymizationOutputDirectory": "streams/anonymous",
+		"writeTaskReport": false,
+		"taskReportDirectory": "report",
+		"writeAnonymization": false,
+		"anonymizationDirectory": "streams/anonymous",
 		"suppressAnonymizationHeader": false,
-		"maximumInstances": 1000,
-		"silenceEvaluation": false,
-		"evaluationOutputDirectory": "evaluation",
-		"evaluationUpdateRate": 10
+		"maximumInstances": 100000,
+		"writeEvaluation": false,
+		"evaluationDirectory": "evaluation",
+		"evaluationUpdateRate": 100,
+		"writeThroughputEvaluation": false,
+		"throughputEvaluationDirectory": "throughput",
+		"throughputUpdateRate": 100
 	}
 }

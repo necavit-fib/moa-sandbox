@@ -25,17 +25,17 @@ def getCodedFilterSpec(filterSpec):
 	filterParams = ''.join(filterComponents[1:len(filterComponents)])
 	return getFilterCode(filterName) + filterParams
 
-def getBaseFilename(stream, filterSpec):
+def getBaseFilename(stream, filterSpec, instances):
 	streamName = stream.split('.')[1]
 	codedFilterSpec = getCodedFilterSpec(filterSpec)
-	return codedFilterSpec + '_' + streamName
+	return codedFilterSpec + '_' + streamName + instances
 
 def getFile(outDir, baseFilename, extension):
 	return outDir + '/' + baseFilename + '.' + extension
 
 def getTaskOptions(options, filterSpec, stream):
 	optionsSpec = ''
-	baseFilename = getBaseFilename(stream,filterSpec) # filename for the task
+	baseFilename = getBaseFilename(stream,filterSpec, str(options['maximumInstances']))
 
 	# instances to anonymize
 	optionsSpec += '-m ' + str(options['maximumInstances']) + ' '
@@ -43,13 +43,13 @@ def getTaskOptions(options, filterSpec, stream):
 	# task report
 	reportOptions = options['report']
 	if reportOptions['writeTaskReport']:
-		file = getFile(options['taskReportDirectory'], baseFilename, 'txt')
+		file = getFile(reportOptions['taskReportDirectory'], baseFilename, 'txt')
 		optionsSpec += '-r ' + file + ' '
 
 	# anonymization
 	anonOptions = options['anonymization']
 	if anonOptions['writeAnonymization']:
-		file = getFile(options['anonymizationDirectory'], baseFilename, 'arff')
+		file = getFile(anonOptions['anonymizationDirectory'], baseFilename, 'arff')
 		optionsSpec += '-a ' + file + ' '
 		if anonOptions['suppressAnonymizationHeader']:
 			optionsSpec += '-h '
@@ -81,7 +81,7 @@ def anonymizeStream(stream, privacyFilter, options):
 
 	# add the necessary redirection for parallel execution
 	if parallel:
-		cmd += ' &> %s' % getFile(logsDir, getBaseFilename(stream, privacyFilter), 'log')
+		cmd += ' &> %s' % getFile(logsDir, getBaseFilename(stream, privacyFilter, str(options['maximumInstances'])), 'log')
 
 	# build wrapper to print nice, short lines in the CLI
 	wrapper = textwrap.TextWrapper(initial_indent='    ', width=120, subsequent_indent='    ')

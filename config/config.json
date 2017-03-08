@@ -22,7 +22,7 @@
 		}
 	],
 	"options": {
-		"maximumInstances": 100000,
+		"maximumInstances": 10000000,
 		"report": {
 			"writeTaskReport": true,
 			"taskReportDirectory": "report"
@@ -35,12 +35,12 @@
 		"evaluation": {
 			"writeEvaluation": false,
 			"evaluationDirectory": "evaluation",
-			"evaluationUpdateRate": 100
+			"evaluationUpdateRate": 1000
 		},
 		"throughput": {
-			"writeThroughput": false,
+			"writeThroughput": true,
 			"throughputDirectory": "throughput",
-			"throughputUpdateRate": 100
+			"throughputUpdateRate": 10000
 		}
 	}
 }

@@ -1,0 +1,81 @@
+{
+	"isScalability": true,
+	"replicas": 10,
+	"streams": [
+		"generators.RandomRBFGenerator"
+	],
+	"filters": [
+		{
+			"filter": "microaggregation.MicroAggregationFilter",
+			"params": [
+				{
+					"name": "k",
+					"values": [3, 10, 100]
+				},
+				{
+					"name": "b",
+					"values": [100,1000,10000]
+				}
+			],
+			"discriminantParameter": "b"
+		},
+		{
+			"filter": "differentialprivacy.DifferentialPrivacyFilter",
+			"params": [
+				{
+					"name": "k",
+					"values": [3, 10, 100]
+				},
+				{
+					"name": "e",
+					"values": [0.1]
+				},
+				{
+					"name": "b",
+					"values": [100,1000,10000]
+				}
+			],
+			"discriminantParameter": "b"
+		},
+		{
+			"filter": "rankswapping.RankSwappingFilter",
+			"params": [
+				{
+					"name": "p",
+					"values": [25, 50, 75]
+				},
+				{
+					"name": "b",
+					"values": [100,1000,10000]
+				}
+			],
+			"discriminantParameter": "b"
+		}
+	],
+	"options": {
+		"scalabilityDirectory": "scalability",
+		"maximumInstances": [
+			100000
+		],
+		"report": {
+			"writeTaskReport": false,
+			"summarizeReport": true,
+			"taskReportDirectory": "report"
+		},
+		"anonymization": {
+			"writeAnonymization": false,
+			"suppressAnonymizationHeader": false,
+			"anonymizationDirectory": "streams/anonymous"
+		},
+		"evaluation": {
+			"writeEvaluation": false,
+			"evaluationDirectory": "evaluation",
+			"evaluationUpdateRate": 1000
+		},
+		"throughput": {
+			"writeThroughput": false,
+			"throughputDirectory": "throughput",
+			"throughputUpdateRate": 10000
+		}
+	}
+}

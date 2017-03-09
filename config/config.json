@@ -22,9 +22,13 @@
 		}
 	],
 	"options": {
-		"maximumInstances": 10000000,
+		"scalabilityDirectory": "scalability",
+		"maximumInstances": [
+			10, 100, 1000, 10000
+		],
 		"report": {
-			"writeTaskReport": true,
+			"writeTaskReport": false,
+			"summarizeReport": true,
 			"taskReportDirectory": "report"
 		},
 		"anonymization": {
@@ -38,7 +42,7 @@
 			"evaluationUpdateRate": 1000
 		},
 		"throughput": {
-			"writeThroughput": true,
+			"writeThroughput": false,
 			"throughputDirectory": "throughput",
 			"throughputUpdateRate": 10000
 		}

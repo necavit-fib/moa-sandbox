@@ -62,16 +62,6 @@
 			"summarizeReport": true,
 			"taskReportDirectory": "report"
 		},
-		"anonymization": {
-			"writeAnonymization": false,
-			"suppressAnonymizationHeader": false,
-			"anonymizationDirectory": "streams/anonymous"
-		},
-		"evaluation": {
-			"writeEvaluation": false,
-			"evaluationDirectory": "evaluation",
-			"evaluationUpdateRate": 1000
-		},
 		"throughput": {
 			"writeThroughput": false,
 			"throughputDirectory": "throughput",

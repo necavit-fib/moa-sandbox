@@ -55,22 +55,19 @@ def getTaskOptions(options, filterSpec, stream, instances):
 def anonymizeStream(stream, privacyFilter, instances, options):
 	# build the command line call
 	cmdFormat = {
-		'scalability': '-e' if scalability else '',
 		'stream': '(%s)' % stream,
 		'filter': '(%s)' % privacyFilter,
-		'taskOpts': getTaskOptions(options, privacyFilter, stream, instances)
+		'task': getTaskOptions(options, privacyFilter, stream, instances)
 	}
-	cmd = './moa.sh %(scalability)s "Anonymize -s %(stream)s -f %(filter)s %(taskOpts)s"' % cmdFormat
+	cmd = './moa.sh -e "Anonymize -s %(stream)s -f %(filter)s %(task)s"' % cmdFormat
 
 	# add the necessary redirection for scalability experiment execution
-	if scalability:
-		global firstTimeScalability
-		scalabilityFile = getFile(options['scalabilityDirectory'], getBaseFilename(stream, privacyFilter, instances), 'csv')
-		if firstTimeScalability:
-			firstTimeScalability = False
-			cmd += ' | cat > ' + scalabilityFile
-		else:
-			cmd += ' | grep csv, | cat >> ' + scalabilityFile
+	scalabilityFile = getFile(options['scalabilityDirectory'], getBaseFilename(stream, privacyFilter, instances), 'csv')
+	if first:
+		first = False
+		cmd += ' | cat > ' + scalabilityFile
+	else:
+		cmd += ' | grep csv, | cat >> ' + scalabilityFile
 
 	# build wrapper to print nice, short lines in the CLI
 	wrapper = textwrap.TextWrapper(initial_indent='    ', width=120, subsequent_indent='    ')
@@ -128,10 +125,11 @@ def anonymizeWithConfig(configuration):
 					first = True
 					for value in discriminantValues:
 						for i in range(0, replicas): # for the specified number of replicas
+							# TODO change the following two lines into the code to make the calls
 							print stream, instances, builtFilter, value, first
 							if first:
 								first = False
-						#TODO anonymizeStream(stream, builtFilter, str(instances), options)
+							#TODO anonymizeStream(stream, instances, builtFilter, str(instances), options)
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Test scalability of MOA-PPSM filters.')

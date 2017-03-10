@@ -1,0 +1,29 @@
+{
+	"isScalability": true,
+	"replicas": 10,
+	"streams": [
+		"generators.RandomRBFGenerator"
+	],
+	"filters": [
+		{
+			"filter": "microaggregation.MicroAggregationFilter",
+			"params": [
+				{
+					"name": "k",
+					"values": [3,10,100]
+				},
+				{
+					"name": "b",
+					"values": [100,1000,10000]
+				}
+			],
+			"discriminantParameter": "b"
+		}
+	],
+	"options": {
+		"scalabilityDirectory": "scalability",
+		"maximumInstances": [
+			1000000
+		]
+	}
+}

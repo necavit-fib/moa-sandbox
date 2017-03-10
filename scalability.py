@@ -14,80 +14,82 @@ import textwrap
 # global flags
 dryRun = False
 
-def getCodedFilterSpec(filterSpec):
+def getCodedFilterSpec(filterSpec, discriminantParameter, paramValue):
+	# print '(', filterSpec, ')', discriminantParameter, paramValue
 	filterComponents = filterSpec.split(' ')
 	filterName = filterComponents[0]
+	for i in range(len(filterComponents)):
+		if filterComponents[i] == ('-'+discriminantParameter):
+			del filterComponents[i+1]
+			del filterComponents[i]
+			break
 	filterParams = ''.join(filterComponents[1:len(filterComponents)])
 	return getFilterCode(filterName) + filterParams
 
-def getBaseFilename(stream, filterSpec, instances):
+def getBaseFilename(stream, filterSpec, discriminantParameter, paramValue):
 	streamName = stream.split('.')[1]
-	codedFilterSpec = getCodedFilterSpec(filterSpec)
-	return codedFilterSpec + '_' + streamName # no instances (concatenate!)
+	codedFilterSpec = getCodedFilterSpec(filterSpec, discriminantParameter, paramValue)
+	return codedFilterSpec + '_' + streamName
 
 def getFile(outDir, baseFilename, extension):
 	return outDir + '/' + baseFilename + '.' + extension
 
-def getTaskOptions(options, filterSpec, stream, instances):
-	optionsSpec = ''
-	baseFilename = getBaseFilename(stream,filterSpec, instances)
+def getTaskOptions(instances):
+	return '-z -m %s' % instances
 
-	# instances to anonymize
-	optionsSpec += '-m ' + instances + ' '
-
-	# task report
-	reportOptions = options['report']
-	if reportOptions['summarizeReport'] or scalability:
-		optionsSpec += '-z '
-	if reportOptions['writeTaskReport']:
-		file = getFile(reportOptions['taskReportDirectory'], baseFilename, 'txt')
-		optionsSpec += '-r ' + file + ' '
-
-	# throughput
-	throughputOptions = options['throughput']
-	if throughputOptions['writeThroughput']:
-		file = getFile(throughputOptions['throughputDirectory'], baseFilename, 'csv')
-		optionsSpec += '-t ' + file + ' '
-		optionsSpec += '-U ' + str(throughputOptions['throughputUpdateRate']) + ' '
-
-	return optionsSpec
-
-def anonymizeStream(stream, privacyFilter, instances, options):
-	# build the command line call
-	cmdFormat = {
-		'stream': '(%s)' % stream,
-		'filter': '(%s)' % privacyFilter,
-		'task': getTaskOptions(options, privacyFilter, stream, instances)
-	}
-	cmd = './moa.sh -e "Anonymize -s %(stream)s -f %(filter)s %(task)s"' % cmdFormat
-
-	# add the necessary redirection for scalability experiment execution
-	scalabilityFile = getFile(options['scalabilityDirectory'], getBaseFilename(stream, privacyFilter, instances), 'csv')
-	if first:
-		first = False
-		cmd += ' | cat > ' + scalabilityFile
-	else:
-		cmd += ' | grep csv, | cat >> ' + scalabilityFile
-
+def cliCall(cmd):
 	# build wrapper to print nice, short lines in the CLI
-	wrapper = textwrap.TextWrapper(initial_indent='    ', width=120, subsequent_indent='    ')
+	wrapper = textwrap.TextWrapper(
+											initial_indent='    ', width=120, subsequent_indent='    ')
 	# check whether or not to actually execute the tasks
 	if not dryRun:
 		print colored('[RUNNING]', 'green'), 'Executing:'
 		print wrapper.fill(colored(cmd, 'cyan'))
-		call(cmd, shell=True)
+		call(cmd, shell=True) # execute the command call
 	else:
 		print colored('[DRY RUN]', 'red'), 'Would be calling:'
 		print wrapper.fill(colored(cmd, 'cyan'))
 
-def buildFilterParams(paramsPermutation, paramsNames):
-	params = ''
-	for i, value in enumerate(paramsPermutation, 0):
-		params = params+'-'+paramsNames[i]+' '+str(value)+' '
+def buildBaseCmd(stream, instances, filterSpec):
+	cmdFormat = {
+		'stream': '-s (%s)' % stream,
+		'filter': '-f (%s)' % filterSpec,
+		'task': getTaskOptions(instances)
+	}
+	return './moa.sh -e "Anonymize %(stream)s %(filter)s %(task)s"' % cmdFormat
 
+def executeExperiment(stream, instances, filterSpec,
+										  discriminantParameter, paramValue, isFirst, options):
+	# build the command line call
+	cmd = buildBaseCmd(stream, instances, filterSpec)
+
+	# add the necessary redirection for scalability experiment execution
+	scalabilityFile = getFile(options['scalabilityDirectory'], \
+									getBaseFilename(stream,filterSpec,discriminantParameter,paramValue), \
+									'csv')
+	cmdFormat = {
+		'head': discriminantParameter,
+		'value': paramValue,
+		'file': scalabilityFile
+	}
+	if isFirst:
+		# change the CSV header and CSV record that MOA outputs as summary
+		cmd += ' | sed "s/csvhead/%(head)s/;s/csv/%(value)s/" > %(file)s' % cmdFormat
+	else:
+		# only grep the CSV record and change it
+		cmd += ' | grep csv, | sed "s/csv/%(value)s/" >> %(file)s' % cmdFormat
+
+	# perform the CLI call
+	cliCall(cmd)
+
+def buildFilterParams(paramsPermutation, paramsNames, discriminantParameter, value):
+	params = ''
+	for i, paramValue in enumerate(paramsPermutation, 0):
+		params += '-' + paramsNames[i] + ' ' + str(paramValue) + ' '
+	params += '-' + discriminantParameter + ' ' + str(value)
 	return params.strip()
 
-def anonymizeWithConfig(configuration):
+def processWithConfig(configuration):
 	filters = configuration['filters']
 	streams = configuration['streams']
 	options = configuration['options']
@@ -98,9 +100,11 @@ def anonymizeWithConfig(configuration):
 		filterName = privacyFilter['filter']
 		params = privacyFilter['params']
 
-		# generate all permutations of filter parameters
+		# generate all permutations of filter parameters, without the discriminant
+		#  parameter (the one over which the scalability is checked)
 		paramsNames = []
 		paramsValues = []
+			# identify the discriminant parameter
 		discriminantParameter = privacyFilter['discriminantParameter']
 		discriminantValues = []
 		for param in params:
@@ -114,9 +118,6 @@ def anonymizeWithConfig(configuration):
 
 		# for each permutation of filter parameters
 		for permutation in paramsPermutations:
-			# generate filter specification
-			filterParams = buildFilterParams(permutation, paramsNames)
-			builtFilter = filterName + ' ' + filterParams
 			# for each stream to anonymize, with the built filter specification
 			for stream in streams:
 				# for each number of instances
@@ -124,12 +125,18 @@ def anonymizeWithConfig(configuration):
 					# discriminate over a parameter (all executions go to the same CSV file)
 					first = True
 					for value in discriminantValues:
+						# generate filter specification
+						filterParams = buildFilterParams(
+														permutation, paramsNames, discriminantParameter, value)
+						builtFilter = filterName + ' ' + filterParams
 						for i in range(0, replicas): # for the specified number of replicas
-							# TODO change the following two lines into the code to make the calls
-							print stream, instances, builtFilter, value, first
+							# print stream, instances, '(', builtFilter, ')', discriminantParameter, value, first
+							executeExperiment(
+									stream, str(instances), builtFilter, \
+									discriminantParameter, str(value), first, options)
+							# not the first one anymore!
 							if first:
 								first = False
-							#TODO anonymizeStream(stream, instances, builtFilter, str(instances), options)
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Test scalability of MOA-PPSM filters.')
@@ -146,7 +153,7 @@ if __name__ == '__main__':
 	with open(args.config_file, 'rb') as configFile:
 		config = json.load(configFile)
 		if not config['isScalability']:
-			print 'error: the configuration provided is not a scalability experiment config file'
+			print 'ERROR: the configuration given is not a scalability experiment config file'
 			sys.exit(1)
 		else:
-			anonymizeWithConfig(configuration=config)
+			processWithConfig(configuration=config)

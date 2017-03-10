@@ -10,7 +10,7 @@
 			"params": [
 				{
 					"name": "k",
-					"values": [3, 10, 100]
+					"values": [3,10,100]
 				},
 				{
 					"name": "b",
@@ -24,7 +24,7 @@
 			"params": [
 				{
 					"name": "k",
-					"values": [3, 10, 100]
+					"values": [3,10,100]
 				},
 				{
 					"name": "e",
@@ -42,7 +42,7 @@
 			"params": [
 				{
 					"name": "p",
-					"values": [25, 50, 75]
+					"values": [10,25,50,75]
 				},
 				{
 					"name": "b",
@@ -55,17 +55,7 @@
 	"options": {
 		"scalabilityDirectory": "scalability",
 		"maximumInstances": [
-			100000
-		],
-		"report": {
-			"writeTaskReport": false,
-			"summarizeReport": true,
-			"taskReportDirectory": "report"
-		},
-		"throughput": {
-			"writeThroughput": false,
-			"throughputDirectory": "throughput",
-			"throughputUpdateRate": 10000
-		}
+			1000000
+		]
 	}
 }

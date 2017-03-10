@@ -14,12 +14,10 @@ import textwrap
 # global flags
 dryRun = False
 parallel = False
-scalability = False
 logsDir = 'logs'
 
 # global variables
 parallelTasks = []
-firstTimeScalability = False
 
 def getCodedFilterSpec(filterSpec):
 	filterComponents = filterSpec.split(' ')
@@ -30,10 +28,7 @@ def getCodedFilterSpec(filterSpec):
 def getBaseFilename(stream, filterSpec, instances):
 	streamName = stream.split('.')[1]
 	codedFilterSpec = getCodedFilterSpec(filterSpec)
-	if scalability:
-		return codedFilterSpec + '_' + streamName # no instances (concatenate!)
-	else:
-		return codedFilterSpec + '_' + streamName + instances
+	return codedFilterSpec + '_' + streamName + instances
 
 def getFile(outDir, baseFilename, extension):
 	return outDir + '/' + baseFilename + '.' + extension
@@ -47,7 +42,7 @@ def getTaskOptions(options, filterSpec, stream, instances):
 
 	# task report
 	reportOptions = options['report']
-	if reportOptions['summarizeReport'] or scalability:
+	if reportOptions['summarizeReport']:
 		optionsSpec += '-z '
 	if reportOptions['writeTaskReport']:
 		file = getFile(reportOptions['taskReportDirectory'], baseFilename, 'txt')
@@ -80,22 +75,11 @@ def getTaskOptions(options, filterSpec, stream, instances):
 def anonymizeStream(stream, privacyFilter, instances, options):
 	# build the command line call
 	cmdFormat = {
-		'scalability': '-e' if scalability else '',
 		'stream': '(%s)' % stream,
 		'filter': '(%s)' % privacyFilter,
 		'taskOpts': getTaskOptions(options, privacyFilter, stream, instances)
 	}
-	cmd = './moa.sh %(scalability)s "Anonymize -s %(stream)s -f %(filter)s %(taskOpts)s"' % cmdFormat
-
-	# add the necessary redirection for scalability experiment execution
-	if scalability:
-		global firstTimeScalability
-		scalabilityFile = getFile(options['scalabilityDirectory'], getBaseFilename(stream, privacyFilter, instances), 'csv')
-		if firstTimeScalability:
-			firstTimeScalability = False
-			cmd += ' | cat > ' + scalabilityFile
-		else:
-			cmd += ' | grep csv, | cat >> ' + scalabilityFile
+	cmd = './moa.sh "Anonymize -s %(stream)s -f %(filter)s %(taskOpts)s"' % cmdFormat
 
 	# add the necessary redirection for parallel execution
 	if parallel:
@@ -131,7 +115,6 @@ def buildFilterParams(paramsPermutation, paramsNames):
 	return params.strip()
 
 def anonymizeWithConfig(configuration):
-	global firstTimeScalability
 	filters = configuration['filters']
 	streams = configuration['streams']
 	options = configuration['options']
@@ -155,8 +138,6 @@ def anonymizeWithConfig(configuration):
 			builtFilter = filterName + ' ' + filterParams
 			# for each stream to anonymize, with the built filter specification
 			for stream in streams:
-				if scalability:
-					firstTimeScalability = True
 				# for each number of instances
 				for instances in options['maximumInstances']:
 					anonymizeStream(stream, builtFilter, str(instances), options)
@@ -172,8 +153,6 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Anonymize stream files using MOA privacy filters.')
 	parser.add_argument('config_file',
 						help='a JSON file with the execution configuration (filters, streams, evaluation, ...)')
-	parser.add_argument('-s', '--scalability', action='store_true',
-						help='writes the commands to execute into a Makefile to be executed in parallel using GNU Make. This option superseeds --dry-run')
 	parser.add_argument('-d', '--dry-run', action='store_true',
 						help='do not execute, just print the commands that WOULD be executed')
 	parser.add_argument('-p', '--parallel', action='store_true',
@@ -185,10 +164,7 @@ if __name__ == '__main__':
 
 	# check if a Makefile generation was requested
 	parallel = args.parallel
-
-	# check if a scalability experiment was requested
-	scalability = args.scalability
-
+	
 	if parallel:
 		response = raw_input('Delete the previous Makefile and generate a new one? (y/n): ')
 		if response != 'y':

@@ -75,15 +75,16 @@ def getTaskOptions(options, filterSpec, stream, instances):
 def anonymizeStream(stream, privacyFilter, instances, options):
 	# build the command line call
 	cmdFormat = {
-		'stream': '(%s)' % stream,
-		'filter': '(%s)' % privacyFilter,
-		'taskOpts': getTaskOptions(options, privacyFilter, stream, instances)
+		'par': '-e -o' if parallel else '',
+		'str': '(%s)' % stream,
+		'fltr': '(%s)' % privacyFilter,
+		'tsk': getTaskOptions(options, privacyFilter, stream, instances)
 	}
-	cmd = './moa.sh "Anonymize -s %(stream)s -f %(filter)s %(taskOpts)s"' % cmdFormat
+	cmd = './moa.sh %(par)s "Anonymize -s %(str)s -f %(fltr)s %(tsk)s"' % cmdFormat
 
 	# add the necessary redirection for parallel execution
-	if parallel:
-		cmd += ' &> %s' % getFile(logsDir, getBaseFilename(stream, privacyFilter, instances), 'log')
+	# if parallel:
+	# 	cmd += ' &> %s' % getFile(logsDir, getBaseFilename(stream, privacyFilter, instances), 'log')
 
 	# build wrapper to print nice, short lines in the CLI
 	wrapper = textwrap.TextWrapper(initial_indent='    ', width=120, subsequent_indent='    ')
@@ -164,7 +165,7 @@ if __name__ == '__main__':
 
 	# check if a Makefile generation was requested
 	parallel = args.parallel
-	
+
 	if parallel:
 		response = raw_input('Delete the previous Makefile and generate a new one? (y/n): ')
 		if response != 'y':

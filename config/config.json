@@ -15,7 +15,7 @@
 				{
 					"name": "a",
 					"values": [
-						0.1
+						0.1, 0.2, 0.3, 0.4, 0.5
 					]
 				}
 			]
@@ -26,7 +26,7 @@
 			1000000
 		],
 		"report": {
-			"writeTaskReport": false,
+			"writeTaskReport": true,
 			"summarizeReport": true,
 			"taskReportDirectory": "report"
 		},
@@ -36,7 +36,7 @@
 			"anonymizationDirectory": "streams/anonymous"
 		},
 		"evaluation": {
-			"writeEvaluation": false,
+			"writeEvaluation": true,
 			"evaluationDirectory": "evaluation",
 			"evaluationUpdateRate": 1000
 		},

@@ -1,0 +1,21 @@
+{
+  "name": "meetup-streamer",
+  "version": "1.0.0",
+  "description": "Small utility to capture a stream of Meetup's RSVPs and transform them into an ARFF file to be fed into Waikato University's MOA",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "meetup",
+    "rsvp",
+    "arff",
+    "moa"
+  ],
+  "author": "David Martínez (github.com/necavit)",
+  "license": "MIT",
+  "dependencies": {
+    "meetup-stream": "0.0.1",
+    "morgan": "^1.8.1"
+  }
+}

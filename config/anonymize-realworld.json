@@ -1,0 +1,88 @@
+{
+	"streams": [
+		"ArffFileStream -f streams/realworld/census.arff -c 0"
+	],
+	"filters": [
+		{
+			"filter": "noiseaddition.NoiseAdditionFilter",
+			"params": [
+				{
+					"name": "a",
+					"values": [0.15,0.2,0.25,0.5]
+				},
+				{
+					"name": "c",
+					"values": [0.0]
+				}
+			]
+		},
+		{
+			"filter": "microaggregation.MicroAggregationFilter",
+			"params": [
+				{
+					"name": "k",
+					"values": [15,25]
+				},
+				{
+					"name": "b",
+					"values": [1000,10000]
+				}
+			]
+		},
+		{
+			"filter": "differentialprivacy.DifferentialPrivacyFilter",
+			"params": [
+				{
+					"name": "k",
+					"values": [15,25]
+				},
+				{
+					"name": "e",
+					"values": [1,10]
+				},
+				{
+					"name": "b",
+					"values": [1000,10000]
+				}
+			]
+		},
+		{
+			"filter": "rankswapping.RankSwappingFilter",
+			"params": [
+				{
+					"name": "p",
+					"values": [2,5,10]
+				},
+				{
+					"name": "b",
+					"values": [1000,10000]
+				}
+			]
+		}
+	],
+	"options": {
+		"maximumInstances": [
+			1000000
+		],
+		"report": {
+			"writeTaskReport": true,
+			"summarizeReport": true,
+			"taskReportDirectory": "report"
+		},
+		"anonymization": {
+			"writeAnonymization": true,
+			"suppressAnonymizationHeader": false,
+			"anonymizationDirectory": "streams/anonymous"
+		},
+		"evaluation": {
+			"writeEvaluation": true,
+			"evaluationDirectory": "evaluation",
+			"evaluationUpdateRate": 100
+		},
+		"throughput": {
+			"writeThroughput": false,
+			"throughputDirectory": "throughput",
+			"throughputUpdateRate": 10000
+		}
+	}
+}

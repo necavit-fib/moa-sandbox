@@ -1,6 +1,4 @@
 {
-	"isScalability": true,
-	"replicas": 10,
 	"streams": [
 		"generators.RandomRBFGenerator"
 	],
@@ -14,10 +12,9 @@
 				},
 				{
 					"name": "b",
-					"values": [100,1000,10000,100000]
+					"values": [10000,100000]
 				}
-			],
-			"discriminantParameter": "b"
+			]
 		},
 		{
 			"filter": "differentialprivacy.DifferentialPrivacyFilter",
@@ -32,10 +29,9 @@
 				},
 				{
 					"name": "b",
-					"values": [100,1000,10000,100000]
+					"values": [10000,100000]
 				}
-			],
-			"discriminantParameter": "b"
+			]
 		},
 		{
 			"filter": "rankswapping.RankSwappingFilter",
@@ -46,16 +42,34 @@
 				},
 				{
 					"name": "b",
-					"values": [100,1000,10000,100000]
+					"values": [10000,100000]
 				}
-			],
-			"discriminantParameter": "b"
+			]
 		}
 	],
 	"options": {
-		"scalabilityDirectory": "scalability",
 		"maximumInstances": [
 			1000000
-		]
+		],
+		"report": {
+			"writeTaskReport": true,
+			"summarizeReport": true,
+			"taskReportDirectory": "report"
+		},
+		"anonymization": {
+			"writeAnonymization": false,
+			"suppressAnonymizationHeader": false,
+			"anonymizationDirectory": "streams/anonymous"
+		},
+		"evaluation": {
+			"writeEvaluation": true,
+			"evaluationDirectory": "evaluation",
+			"evaluationUpdateRate": 1000
+		},
+		"throughput": {
+			"writeThroughput": false,
+			"throughputDirectory": "throughput",
+			"throughputUpdateRate": 10000
+		}
 	}
 }
